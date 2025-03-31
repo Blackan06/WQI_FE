@@ -1,0 +1,2 @@
+node_modules
+# ẩn thư mục không cần build trong docker-image
