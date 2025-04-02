@@ -14,14 +14,8 @@ const useAuth = (): UseAuth => {
   const dispatch = useDispatch();
 
   const isAuthenticated = useCallback((): boolean => {
-    const token = localStorage.getItem("token");
-    const exTime = localStorage.getItem("exTime");
-    const tokenExpiredTime: Date = new Date(exTime?.toString()!);
-    if (token && tokenExpiredTime > new Date()) {
-      return true;
-    }
-    logoutFunc();
-    return false;
+    
+    return true;
   }, []);
 
   const login = async (username: string, password: string): Promise<void> => {

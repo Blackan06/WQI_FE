@@ -2,7 +2,7 @@ FROM node:16 as build-src
 WORKDIR /app
 COPY . .
 RUN yarn install --ignore--platform
-ENV API_PATH="https://cmsapi.hisoft.vn"
+ENV API_PATH="https://dm.anhkiet.xyz"
 RUN yarn build
 
 FROM nginx:alpine
