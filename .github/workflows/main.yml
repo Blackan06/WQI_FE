@@ -57,4 +57,4 @@ jobs:
             docker run -d \
               --name my-app-container \
               -p 80:80 \
-              your-dockerhub-username/your-app:latest
+              ${{ secrets.DOCKER_USER }}/dm_fe:latest
