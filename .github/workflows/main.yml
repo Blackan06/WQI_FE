@@ -1,0 +1,72 @@
+name: Build, Publish & Deploy Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ secrets.DOCKER_USER }}/dm_fe:latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app
+        run: npm run build
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build & push Docker image
+        id: docker_build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile        # hoặc Dockerfile.react / Dockerfile.next
+          push: true
+          tags: ${{ secrets.DOCKER_USER }}/dm_fe:latest
+
+  deploy:
+    name: Deploy to Server via SSH
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH & Pull new image, Restart container
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "Logging in to Docker registry..."
+            echo ${{ secrets.DOCKER_PASSWORD }} | docker login  -u ${{ secrets.DOCKER_USER }} --password-stdin
+            echo "Pulling Docker image from Docker registry..."
+           
+            docker pull ${{ secrets.DOCKER_USER }}/dm_fe:latest
+
+            echo "Stopping old container (if exists)..."
+            docker stop my-app-container || true
+            docker rm my-app-container   || true
+
+            echo "Starting new container..."
+            docker run -d \
+              --name my-app-container \
+              -p 80:80 \
+              your-dockerhub-username/your-app:latest
