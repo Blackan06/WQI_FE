@@ -15,19 +15,28 @@ const useAuth = (): UseAuth => {
 
   const isAuthenticated = useCallback((): boolean => {
     
-    return true;
-  }, []);
+    const token = localStorage.getItem("token");
+    const exTime = localStorage.getItem("exTime");
+    const tokenExpiredTime: Date = new Date(exTime?.toString()!);
+    if (token && tokenExpiredTime > new Date()) {
+      return true;
+    }
+    logoutFunc();
+    return false;
+    }, []);
 
-  const login = async (username: string, password: string): Promise<void> => {
-    const token = unwrapResult(await dispatch(signin({ username, password })));
-    localStorage.setItem("token", token.access_token);
-    localStorage.setItem(
-      "exTime",
-      moment()
-        .add(token.expiresIn * 1000, "seconds")
-        .toString()
-    );
-  };
+    const login = async (username: string, password: string): Promise<void> => {
+      try {
+        const token = unwrapResult(await dispatch(signin({ username, password })));
+        localStorage.setItem("token", token.access_token);
+        localStorage.setItem("exTime", moment().add(30, "minutes").toString());
+      } catch (error) {
+        console.error("Login error:", error);
+        // Nếu error là đối tượng, bạn có thể chuyển đổi nó thành chuỗi JSON để hiển thị chi tiết hơn:
+        alert("Login failed: " + JSON.stringify(error));
+      }
+    };
+    
 
   const logoutFunc = () => {
     localStorage.removeItem("token");
