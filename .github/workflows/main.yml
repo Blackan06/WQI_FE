@@ -43,8 +43,6 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "Logging in to Docker registry..."
-            echo ${{ secrets.DOCKER_PASSWORD }} | docker login  -u ${{ secrets.DOCKER_USER }} --password-stdin
             echo "Pulling Docker image from Docker registry..."
            
             docker pull ${{ secrets.DOCKER_USER }}/dm_fe:latest
@@ -54,5 +52,5 @@ jobs:
             docker rm dm_fe || true
 
             echo "Starting new container..."
-            docker run -d --name dm_fe -p 3000:3000 --restart=always ${{ secrets.DOCKER_USER }}/dm_fe:latest
+            docker run -d --name dm_fe -p 3000:80 --restart=always ${{ secrets.DOCKER_USER }}/dm_fe:latest
 
