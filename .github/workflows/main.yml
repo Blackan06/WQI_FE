@@ -55,6 +55,6 @@ jobs:
 
             echo "Starting new container..."
             docker run -d \
-              --name my-app-container \
+              --name dm_fe \
               -p 80:80 \
               ${{ secrets.DOCKER_USER }}/dm_fe:latest
