@@ -35,7 +35,7 @@ const LoginPage: React.FC = () => {
   }, []);
   return (
     <div className="container-login-form">
-      <h1>WELLCOME</h1>
+      <h1>WELCOME</h1>
       <Form
         name="basic"
         labelCol={{ span: 8 }}
