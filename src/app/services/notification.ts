@@ -41,44 +41,17 @@ class NotificationService {
         this.reconnectAttempts = 0;
         // Send a ping message to verify connection
         this.ws?.send(JSON.stringify({ type: 'ping' }));
-        toast.success('Connected to notification service', {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-          style: {
-            background: '#4CAF50',
-            color: 'white',
-            fontSize: '14px',
-            fontWeight: '500',
-          }
-        });
       };
 
       this.ws.onmessage = (event) => {
         try {
           const raw = event.data;  
-          console.log('Raw WebSocket message received:', raw);
-          
-          // Parse payload using global JSON
           const payload = JSON.parse(JSON.parse(raw));
-          console.log('typeof payload:', typeof payload);        // 'object' cho cả {} lẫn []
-          console.table(Object.keys(payload));  // liệt kê các key thật sự
-          console.log('Parsed payload:', payload);
-        
-          // Get type and data from payload
           const type = payload.type;
           const notifData = payload.data;
-          console.log('Type:', type);
-          console.log('Notification data:', notifData);
 
           // Kiểm tra nếu là thông báo lỗi login
           if (type === 'error' && notifData?.message?.includes('Login failed')) {
-            console.log('Login error detected:', notifData);
             toast.error('Login failed. Please check your credentials and try again.', {
               position: "top-right",
               autoClose: 5000,
@@ -108,11 +81,9 @@ class NotificationService {
               isRead: false,
               status: notifData.status || 'info'
             };
-            console.log('Created notification object:', notification);
 
             // Dispatch action để thêm thông báo mới
             store.dispatch(addNotification(notification));
-            console.log('Current store state after addNotification:', store.getState());
             
             // Thông báo cho các listeners
             this.notifyListeners();
@@ -146,103 +117,30 @@ class NotificationService {
                 style: toastStyle
               }
             );
-            console.log('Displayed toast notification');
+
+            // Tự động đánh dấu đã đọc sau khi nhận thông báo
+            if (notification.id) {
+              this.markAsRead(notification.id);
+            }
           }
         } catch (error) {
           console.error('Error processing notification:', error);
-          console.error('Error details:', {
-            error,
-            message: error instanceof Error ? error.message : 'Unknown error',
-            stack: error instanceof Error ? error.stack : undefined
-          });
-          toast.error('Failed to process notification. Please try again.', {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "colored",
-            style: {
-              background: '#f44336',
-              color: 'white',
-              fontSize: '14px',
-              fontWeight: '500',
-            }
-          });
         }
       };
 
       this.ws.onclose = (event) => {
-        console.log('WebSocket connection closed:', event.code, event.reason);
         if (event.code === 1006) {
-          console.log('Connection closed abnormally. Check if the server is running and accessible.');
-          toast.warning('Lost connection to server. Attempting to reconnect...', {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "colored",
-            style: {
-              background: '#ff9800',
-              color: 'white',
-              fontSize: '14px',
-              fontWeight: '500',
-            }
-          });
+          console.log('Connection closed abnormally');
         }
         this.reconnect();
       };
 
       this.ws.onerror = (error) => {
         console.error('WebSocket error:', error);
-        // Log additional connection details
-        console.log('Connection details:', {
-          url: this.wsUrl,
-          readyState: this.ws?.readyState,
-          protocol: this.ws?.protocol,
-          extensions: this.ws?.extensions
-        });
-        toast.error('Failed to connect to server. Please check your internet connection.', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-          style: {
-            background: '#f44336',
-            color: 'white',
-            fontSize: '14px',
-            fontWeight: '500',
-          }
-        });
       };
 
     } catch (error) {
       console.error('Failed to connect to WebSocket:', error);
-      toast.error('Failed to establish WebSocket connection. Please try again later.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        style: {
-          background: '#f44336',
-          color: 'white',
-          fontSize: '14px',
-          fontWeight: '500',
-        }
-      });
       this.reconnect();
     }
   }
@@ -251,71 +149,27 @@ class NotificationService {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       const delay = this.reconnectTimeout * Math.pow(2, this.reconnectAttempts - 1); // Exponential backoff
-      console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts}) in ${delay}ms`);
       setTimeout(() => {
         this.connect();
       }, delay);
     } else {
-      console.error('Max reconnection attempts reached. Please check if the WebSocket server is running.');
-      toast.error('Maximum reconnection attempts reached. Please refresh the page.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        style: {
-          background: '#f44336',
-          color: 'white',
-          fontSize: '14px',
-          fontWeight: '500',
-        }
-      });
+      console.error('Max reconnection attempts reached');
     }
   }
 
   public async markAsRead(notificationId: string) {
     try {
+      const id = parseInt(notificationId, 10);
+      if (isNaN(id)) {
+        console.error('Invalid notification ID:', notificationId);
+        return;
+      }
       await httpClient.post({
-        url: `${urlSignalR}/api/notifications/${notificationId}/read`,
+        url: `${urlSignalR}/api/notifications/${id}/read`,
       });
       store.dispatch(updateUnreadCount(-1));
-      toast.success('Notification marked as read', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        style: {
-          background: '#4CAF50',
-          color: 'white',
-          fontSize: '14px',
-          fontWeight: '500',
-        }
-      });
     } catch (error) {
       console.error('Error marking notification as read:', error);
-      toast.error('Failed to mark notification as read. Please try again.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        style: {
-          background: '#f44336',
-          color: 'white',
-          fontSize: '14px',
-          fontWeight: '500',
-        }
-      });
     }
   }
 

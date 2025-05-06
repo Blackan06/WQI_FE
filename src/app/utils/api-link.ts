@@ -1,5 +1,5 @@
 export const urlServerSide = "https://dm.anhkiet.xyz";
-export const urlSignalR = "https://imsapi.hisoft.vn";
+export const urlSignalR = "https://dm.anhkiet.xyz";
 
 const apiLinks = {
   user: {
