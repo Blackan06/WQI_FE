@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { logout, signin } from "../slice/auth";
 import useDispatch from "./use-dispatch";
 import moment from "moment";
+import { toast } from 'react-toastify';
 
 type UseAuth = {
   isAuthenticated: () => boolean;
@@ -32,8 +33,22 @@ const useAuth = (): UseAuth => {
         localStorage.setItem("exTime", moment().add(30, "minutes").toString());
       } catch (error) {
         console.error("Login error:", error);
-        // Nếu error là đối tượng, bạn có thể chuyển đổi nó thành chuỗi JSON để hiển thị chi tiết hơn:
-        alert("Login failed: " + JSON.stringify(error));
+        toast.error("Login failed: " + JSON.stringify(error), {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          style: {
+            background: '#f44336',
+            color: 'white',
+            fontSize: '14px',
+            fontWeight: '500',
+          }
+        });
       }
     };
     

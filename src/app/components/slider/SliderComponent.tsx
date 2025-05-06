@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 const SliderComponent: React.FC = () => {
   const dispatch = useDispatch();
   const { collapsed, sliderMenuItemSelectedKey } = useSelector(
-    (state) => state.global
+    (state) => state.globalSlice
   );
   const navigate = useNavigate();
 

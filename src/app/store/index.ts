@@ -1,3 +1,4 @@
+// src/store/index.ts
 import { configureStore } from "@reduxjs/toolkit";
 import appReducers from "../slice";
 
@@ -12,7 +13,10 @@ const store = configureStore({
     }),
 });
 
+export type RootState = ReturnType<typeof store.getState>;
+// thêm dòng này:
+export type AppState = RootState;
+
 export type AppDispatch = typeof store.dispatch;
-export type AppState = ReturnType<typeof store.getState>;
 
 export default store;

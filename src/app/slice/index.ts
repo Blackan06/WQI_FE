@@ -1,4 +1,11 @@
-import auth from "./auth";
-import global from "./global";
+import authReducer from './auth';
+import globalReducer from './global';
+import notificationReducer from './notification';
 
-export default { auth, global };
+const appReducers = {
+  authSlice: authReducer,
+  globalSlice: globalReducer,
+  notificationSlice: notificationReducer,
+};
+
+export default appReducers;
