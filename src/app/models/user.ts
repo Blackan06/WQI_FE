@@ -9,6 +9,7 @@ export interface LoginResponse {
   email: string;
   phoneNumber?: string;
   currenNoticeCount: number;
+  account_id: number;
 }
 
 export interface User extends Base {

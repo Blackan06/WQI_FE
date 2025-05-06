@@ -10,11 +10,25 @@ class NotificationService {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectTimeout = 3000;
-  private wsUrl = 'ws://dm.anhkiet.xyz/notifications/ws/2';
+  private baseWsUrl = 'ws://dm.anhkiet.xyz/notifications/ws/';
+  private accountId: number | null = null;
   private eventTarget: EventTarget;
 
   constructor() {
     this.eventTarget = new EventTarget();
+  }
+
+  public setAccountId(id: number) {
+    console.log('Setting account ID:', id);
+    console.log('Previous account ID:', this.accountId);
+    this.accountId = id;
+    console.log('New account ID set:', this.accountId);
+    // Nếu đã có kết nối WebSocket, đóng nó và kết nối lại với account_id mới
+    if (this.ws) {
+      console.log('Disconnecting existing WebSocket connection');
+      this.disconnect();
+    }
+    console.log('Initiating new WebSocket connection with account ID:', this.accountId);
     this.connect();
   }
 
@@ -31,10 +45,16 @@ class NotificationService {
   }
 
   private connect() {
+    if (this.accountId === null) {
+      console.log('No account ID available, skipping WebSocket connection');
+      return;
+    }
+
     try {
-      console.log('Attempting to connect to WebSocket:', this.wsUrl);
+      const wsUrl = `${this.baseWsUrl}${this.accountId}`;
+      console.log('Attempting to connect to WebSocket:', wsUrl);
       // Kết nối tới WebSocket server
-      this.ws = new WebSocket(this.wsUrl);
+      this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
         console.log('Connected to WebSocket server');
@@ -104,8 +124,8 @@ class NotificationService {
             
             // Hiển thị toast thông báo
             toast.info(
-              `${notification.title}\n${notification.message}`, 
-              {
+                `Title: ${notification.title}\nMessage: ${notification.message}`,
+                {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -165,7 +185,7 @@ class NotificationService {
         return;
       }
       await httpClient.post({
-        url: `${urlSignalR}/api/notifications/${id}/read`,
+        url: `${urlSignalR}/notifications/notifications/${id}/read`,
       });
       store.dispatch(updateUnreadCount(-1));
     } catch (error) {

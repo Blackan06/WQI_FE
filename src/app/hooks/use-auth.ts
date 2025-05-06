@@ -4,6 +4,7 @@ import { logout, signin } from "../slice/auth";
 import useDispatch from "./use-dispatch";
 import moment from "moment";
 import { toast } from 'react-toastify';
+import notificationService from "../services/notification";
 
 type UseAuth = {
   isAuthenticated: () => boolean;
@@ -31,6 +32,12 @@ const useAuth = (): UseAuth => {
         const token = unwrapResult(await dispatch(signin({ username, password })));
         localStorage.setItem("token", token.access_token);
         localStorage.setItem("exTime", moment().add(30, "minutes").toString());
+        
+        // Set account_id for notifications after successful login
+        if (token.account_id) {
+          console.log('Login successful, setting account_id:', token.account_id);
+          notificationService.setAccountId(token.account_id);
+        }
       } catch (error) {
         console.error("Login error:", error);
         toast.error("Login failed: " + JSON.stringify(error), {
