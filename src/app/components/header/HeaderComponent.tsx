@@ -77,6 +77,10 @@ const HeaderComponents: React.FC = () => {
     }
   };
 
+  const handleBellClick = () => {
+    notificationService.resetUnreadCount();
+  };
+
   const notificationItems = {
     items: [
       {
@@ -85,7 +89,7 @@ const HeaderComponents: React.FC = () => {
           <div style={{ width: 300, maxHeight: 400, overflow: 'auto' }}>
             {notifications.length > 0 ? (
               <List<Notification>
-                dataSource={notifications}
+                dataSource={notifications.slice(0, 1)}
                 renderItem={(item: Notification) => (
                   <List.Item
                     onClick={() => handleNotificationClick(item)}
@@ -145,7 +149,7 @@ const HeaderComponents: React.FC = () => {
         </span>
       </div>
       <div className="w-1/3 flex justify-end pr-4 items-center space-x-4">
-        <Dropdown menu={notificationItems} placement="bottomRight" trigger={['click']}>
+        <Dropdown menu={notificationItems} placement="bottomRight" trigger={['click']} onOpenChange={handleBellClick}>
           <Badge count={unreadCount} size="small">
             <Button
               type="text"

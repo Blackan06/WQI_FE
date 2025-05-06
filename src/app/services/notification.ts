@@ -199,6 +199,35 @@ class NotificationService {
       this.ws = null;
     }
   }
+
+  private handleMessage(event: MessageEvent) {
+    try {
+      const data = JSON.parse(event.data);
+      console.log('Received notification:', data);
+      
+      // Chỉ xử lý thông báo mới nhất
+      if (data && data.length > 0) {
+        const latestNotification = data[0]; // Lấy thông báo mới nhất
+        const notification: Notification = {
+          id: latestNotification.id,
+          title: latestNotification.title,
+          message: latestNotification.message,
+          timestamp: latestNotification.timestamp,
+          isRead: latestNotification.isRead,
+          status: latestNotification.status
+        };
+        
+        store.dispatch(addNotification(notification));
+        this.notifyListeners();
+      }
+    } catch (error) {
+      console.error('Error parsing notification:', error);
+    }
+  }
+
+  public resetUnreadCount() {
+    store.dispatch(updateUnreadCount(0));
+  }
 }
 
 export default new NotificationService(); 
