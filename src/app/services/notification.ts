@@ -10,7 +10,7 @@ class NotificationService {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectTimeout = 3000;
-  private baseWsUrl = 'wss://dm.anhkiet.xyz/notifications/ws/';
+  private baseWsUrl = 'wss://datamanagerment.anhkiet.xyz/notifications/ws/';
   private accountId: number | null = null;
   private eventTarget: EventTarget;
 

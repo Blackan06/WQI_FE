@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { HomeOutlined, UserOutlined } from "@ant-design/icons";
+import { HomeOutlined, EnvironmentOutlined, MessageOutlined, DatabaseOutlined } from "@ant-design/icons";
 
 export interface SliderMenuItem {
   key: string;
@@ -14,8 +14,18 @@ export const MenuItem = [
     label: "Home",
   },
   {
-    key: "user",
-    icon: <UserOutlined />,
-    label: "User",
+    key: "station",
+    icon: <EnvironmentOutlined />,
+    label: "WQI Data",
+  },
+  {
+    key: "monitoring-station",
+    icon: <DatabaseOutlined />,
+    label: "Monitoring Station",
+  },
+  {
+    key: "kafka",
+    icon: <MessageOutlined />,
+    label: "Kafka",
   },
 ] as SliderMenuItem[];

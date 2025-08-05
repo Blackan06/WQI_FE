@@ -1,7 +1,7 @@
 import { Button, Form, Input, message } from "antd";
 import "./loginStyle.css";
 import authService from "../../services/auth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AUTH, LOGIN } from "../../routes/routes";
 import useAuth from "../../hooks/use-auth";
@@ -12,10 +12,16 @@ type FieldType = {
 };
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { logoutFunc, login } = useAuth();
+  const { logoutFunc, login, loginLoading } = useAuth();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   const onFinish = async (values: any) => {
-    await login(values.username, values.password);
-    navigate(AUTH);
+    try {
+      await login(values.username, values.password);
+      setIsLoggedIn(true); // Trigger re-render
+    } catch (error) {
+      // Error is already handled in useAuth hook
+    }
   };
 
   const onFinishFailed = (errorInfo: any) => {
@@ -27,10 +33,15 @@ const LoginPage: React.FC = () => {
     if (token) {
       navigate(AUTH); //routing to authPage to check token validation
       message.success("Login successfully!");
-    } else {
-      logoutFunc();
-      navigate(LOGIN);
-      message.warning("PLEASE LOGIN!");
+    }
+  }, [isLoggedIn, navigate]);
+
+  // Only show welcome message when component first mounts
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      // Only show message if user is not already logged in
+      message.info("Vui lòng đăng nhập để tiếp tục");
     }
   }, []);
   return (
@@ -63,7 +74,7 @@ const LoginPage: React.FC = () => {
         </Form.Item>
 
         <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit" loading={loginLoading}>
             Submit
           </Button>
         </Form.Item>

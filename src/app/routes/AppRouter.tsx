@@ -5,8 +5,11 @@ import HomePage from "../pages/home/HomePage";
 import LoginPage from "../pages/login/LoginPage";
 import PageNotFound from "../pages/notFound/PageNotFound";
 import UserPage from "../pages/user/UserPage";
+import StationPage from "../pages/station/StationPage";
+import MonitoringStationPage from "../pages/monitoring-station/MonitoringStationPage";
+import KafkaPage from "../pages/kafka/KafkaPage";
 import PrivateRoute from "./PrivateRoute";
-import { AUTH, DEFAUTL, HOME, LOGIN, USER } from "./routes";
+import { AUTH, DEFAUTL, HOME, LOGIN, USER, STATION, MONITORING_STATION, KAFKA } from "./routes";
 import NoLayout from "../components/layouts/NoLayout";
 import SliderFullLayout from "../components/layouts/SiderFullLayout";
 
@@ -30,6 +33,30 @@ const AppRouter: React.FC = () => {
           element={
             <PrivateRoute layout={NoLayout}>
               <UserPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path={STATION}
+          element={
+            <PrivateRoute layout={SliderFullLayout}>
+              <StationPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path={MONITORING_STATION}
+          element={
+            <PrivateRoute layout={SliderFullLayout}>
+              <MonitoringStationPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path={KAFKA}
+          element={
+            <PrivateRoute layout={SliderFullLayout}>
+              <KafkaPage />
             </PrivateRoute>
           }
         />
