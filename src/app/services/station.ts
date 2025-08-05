@@ -10,9 +10,9 @@ import httpClient from "../utils/http-client";
 
 // WQI Data operations
 const getStations = async (): Promise<WQIData[]> => {
-  // Since there's no getAll endpoint, we'll use search with empty string to get all
+  // Call the endpoint directly without /all
   const response = await httpClient.get({
-    url: `${apiLinks.station.getByName}/all`,
+    url: apiLinks.station.getByName,
   });
   return response.data;
 };
