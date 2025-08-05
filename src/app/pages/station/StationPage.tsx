@@ -31,12 +31,6 @@ const StationPage: React.FC = () => {
       render: (_: any, __: any, index: number) => index + 1,
     },
     {
-      title: "ID Trạm",
-      dataIndex: "station_id",
-      key: "station_id",
-      width: 100,
-    },
-    {
       title: "Tên Trạm",
       dataIndex: "station_name",
       key: "station_name",
@@ -76,13 +70,6 @@ const StationPage: React.FC = () => {
       key: "wqi",
       width: 100,
       render: (value: number) => value ? value.toFixed(2) : '-',
-    },
-    {
-      title: "Ngày Tạo",
-      dataIndex: "created_at",
-      key: "created_at",
-      width: 150,
-      render: (text: string) => text ? new Date(text).toLocaleString('vi-VN') : '-',
     },
   ];
 
