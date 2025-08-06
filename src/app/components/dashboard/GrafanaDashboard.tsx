@@ -9,8 +9,8 @@ const GrafanaDashboard: React.FC<GrafanaDashboardProps> = ({
   height = '400px',
   className = ''
 }) => {
-  // ✅ Grafana URL với var-station_id=0
-  const grafanaUrl = 'https://grafana.anhkiet.xyz/d/water-quality/water-quality-monitoring-dashboard?orgId=1&refresh=30s&var-station_id=0&from=1041379200000&to=1767225599000';
+  // ✅ Grafana URL với dashboard mới
+  const grafanaUrl = 'https://grafana.anhkiet.xyz/d/water-quality-monitoring-dashboard/water-quality-monitoring-dashboard?orgId=1&refresh=30s&from=1041379200000&to=1767225599000';
 
   return (
     <div className={`w-full ${className}`} style={{ height: '100vh', width: '100%' }}>
