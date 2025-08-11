@@ -10,6 +10,7 @@ import {
   createStation,
   updateStation,
   deleteStation,
+  setSelectedStation,
 } from "../slice/monitoring-station";
 import useDispatch from "./use-dispatch";
 import useSelector from "./use-selector";
@@ -30,6 +31,7 @@ type UseMonitoringStation = {
   createStation: (data: CreateStationRequest) => Promise<void>;
   updateStation: (id: number, data: UpdateStationRequest) => Promise<void>;
   deleteStation: (id: number) => Promise<void>;
+  setSelectedStation: (station: MonitoringStation | null) => void;
 };
 
 const useMonitoringStation = (): UseMonitoringStation => {
@@ -76,6 +78,10 @@ const useMonitoringStation = (): UseMonitoringStation => {
     await dispatch(deleteStation(id));
   }, [dispatch]);
 
+  const setSelectedStationAction = useCallback((station: MonitoringStation | null): void => {
+    dispatch(setSelectedStation(station));
+  }, [dispatch]);
+
   return {
     stations,
     loading,
@@ -91,6 +97,7 @@ const useMonitoringStation = (): UseMonitoringStation => {
     createStation: createStationAction,
     updateStation: updateStationAction,
     deleteStation: deleteStationAction,
+    setSelectedStation: setSelectedStationAction,
   };
 };
 

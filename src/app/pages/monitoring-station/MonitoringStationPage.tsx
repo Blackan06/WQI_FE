@@ -45,13 +45,15 @@ const MonitoringStationPage: React.FC = () => {
     fetchInactiveStations,
     createStation,
     updateStation,
-    deleteStation
+    deleteStation,
+    setSelectedStation
   } = useMonitoringStation();
 
   const [searchValue, setSearchValue] = useState("");
   const [searchType, setSearchType] = useState<"name" | "location" | "description">("name");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [editingStationId, setEditingStationId] = useState<number | null>(null);
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -85,6 +87,8 @@ const MonitoringStationPage: React.FC = () => {
 
   const handleEdit = (record: MonitoringStation) => {
     setIsEditMode(true);
+    setEditingStationId(record.station_id);
+    setSelectedStation(record);
     form.setFieldsValue({
       station_name: record.station_name,
       location: record.location,
@@ -105,20 +109,39 @@ const MonitoringStationPage: React.FC = () => {
     }
   };
 
+  const handleModalCancel = () => {
+    setIsModalVisible(false);
+    form.resetFields();
+    setEditingStationId(null);
+    setSelectedStation(null);
+    setIsEditMode(false);
+  };
+
   const handleModalOk = async () => {
     try {
       const values = await form.validateFields();
-      if (isEditMode && selectedStation) {
-        await updateStation(selectedStation.station_id, values);
+      console.log('Form values:', values);
+      console.log('Is edit mode:', isEditMode);
+      console.log('Editing station ID:', editingStationId);
+      
+      if (isEditMode && editingStationId) {
+        console.log('Updating station with ID:', editingStationId);
+        await updateStation(editingStationId, values);
         message.success("Cập nhật trạm thành công!");
-      } else {
+      } else if (!isEditMode) {
+        console.log('Creating new station');
         await createStation(values as CreateStationRequest);
         message.success("Tạo trạm thành công!");
+      } else {
+        throw new Error('Missing station ID for update');
       }
       setIsModalVisible(false);
       form.resetFields();
+      setEditingStationId(null);
+      setSelectedStation(null);
     } catch (error) {
-      message.error("Thao tác thất bại!");
+      console.error('Error in handleModalOk:', error);
+      message.error(`Thao tác thất bại: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -275,10 +298,7 @@ const MonitoringStationPage: React.FC = () => {
         title={isEditMode ? "Cập Nhật Trạm" : "Thêm Trạm Mới"}
         open={isModalVisible}
         onOk={handleModalOk}
-        onCancel={() => {
-          setIsModalVisible(false);
-          form.resetFields();
-        }}
+        onCancel={handleModalCancel}
         width={600}
         okText={isEditMode ? "Cập nhật" : "Tạo"}
         cancelText="Hủy"
