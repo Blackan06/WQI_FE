@@ -11,13 +11,22 @@ const notificationSlice = createSlice({
   initialState,
   reducers: {
     addNotification: (state, action: PayloadAction<Notification>) => {
+      // Chỉ lưu trữ thông báo mới nhất
       state.notifications = [action.payload];
       if (!action.payload.isRead) {
         state.unreadCount = 1;
+      } else {
+        state.unreadCount = 0;
       }
     },
     updateUnreadCount: (state, action: PayloadAction<number>) => {
-      state.unreadCount = Math.max(0, action.payload);
+      // Nếu action.payload là số âm, trừ đi từ unreadCount hiện tại
+      // Nếu là số dương, set giá trị tuyệt đối
+      if (action.payload < 0) {
+        state.unreadCount = Math.max(0, state.unreadCount + action.payload);
+      } else {
+        state.unreadCount = action.payload;
+      }
     },
     markAsRead: (state, action: PayloadAction<string>) => {
       const notification = state.notifications.find(n => n.id === action.payload);

@@ -75,6 +75,7 @@ const HeaderComponents: React.FC = () => {
       dispatch(markAsRead(notification.id));
       notificationService.markAsRead(notification.id);
     }
+    // Có thể thêm logic để mở chi tiết notification hoặc thực hiện hành động khác
   };
 
   const handleBellClick = () => {
@@ -89,18 +90,31 @@ const HeaderComponents: React.FC = () => {
           <div style={{ width: 300, maxHeight: 400, overflow: 'auto' }}>
             {notifications.length > 0 ? (
               <List<Notification>
-                dataSource={notifications.slice(0, 1)}
+                dataSource={notifications}
                 renderItem={(item: Notification) => (
                   <List.Item
                     onClick={() => handleNotificationClick(item)}
                     style={{ 
                       cursor: 'pointer',
                       backgroundColor: item.isRead ? 'transparent' : '#f0f0f0',
-                      padding: '8px'
+                      padding: '8px',
+                      borderBottom: '1px solid #f0f0f0'
                     }}
                   >
                     <List.Item.Meta
-                      title={<Text strong>{item.title}</Text>}
+                      title={
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Text strong>{item.title}</Text>
+                          {!item.isRead && (
+                            <div style={{ 
+                              width: '8px', 
+                              height: '8px', 
+                              borderRadius: '50%', 
+                              backgroundColor: '#1890ff' 
+                            }} />
+                          )}
+                        </div>
+                      }
                       description={
                         <div>
                           <Text>{item.message}</Text>

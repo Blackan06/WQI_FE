@@ -138,10 +138,7 @@ class NotificationService {
               }
             );
 
-            // Tự động đánh dấu đã đọc sau khi nhận thông báo
-            if (notification.id) {
-              this.markAsRead(notification.id);
-            }
+            // KHÔNG tự động đánh dấu đã đọc - để user tự click vào notification
           }
         } catch (error) {
           console.error('Error processing notification:', error);
@@ -187,6 +184,7 @@ class NotificationService {
       await httpClient.post({
         url: `${urlSignalR}/notifications/notifications/${id}/read`,
       });
+      // Giảm unreadCount đi 1
       store.dispatch(updateUnreadCount(-1));
     } catch (error) {
       console.error('Error marking notification as read:', error);
