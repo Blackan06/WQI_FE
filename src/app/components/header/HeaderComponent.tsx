@@ -1,13 +1,13 @@
-import { Button, Layout, theme, Dropdown, Badge, List, Typography, Empty } from "antd";
+import { Button, Layout, theme, Dropdown, Badge, List, Typography, Empty, Space } from "antd";
 import useDispatch from "../../hooks/use-dispatch";
-import { MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined, BellOutlined } from "@ant-design/icons";
+import { MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined, BellOutlined, DeleteOutlined } from "@ant-design/icons";
 import { setCollapsed } from "../../slice/global";
 import useSelector from "../../hooks/use-selector";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/use-auth";
 import { LOGIN } from "../../routes/routes";
 import { MenuItem } from "../../utils/global";
-import { markAsRead } from "../../slice/notification";
+import { markAsRead, clearAllNotifications, clearOldNotifications } from "../../slice/notification";
 import notificationService from "../../services/notification";
 import { Notification } from "../../models/notification";
 import { useEffect, useState } from "react";
@@ -82,6 +82,14 @@ const HeaderComponents: React.FC = () => {
     notificationService.resetUnreadCount();
   };
 
+  const handleClearAllNotifications = () => {
+    dispatch(clearAllNotifications());
+  };
+
+  const handleClearOldNotifications = () => {
+    dispatch(clearOldNotifications());
+  };
+
   const notificationItems = {
     items: [
       {
@@ -89,49 +97,69 @@ const HeaderComponents: React.FC = () => {
         label: (
           <div style={{ width: 300, maxHeight: 400, overflow: 'auto' }}>
             {notifications.length > 0 ? (
-              <List<Notification>
-                dataSource={notifications}
-                renderItem={(item: Notification) => (
-                  <List.Item
-                    onClick={() => handleNotificationClick(item)}
-                    style={{ 
-                      cursor: 'pointer',
-                      backgroundColor: item.isRead ? 'transparent' : '#f0f0f0',
-                      padding: '8px',
-                      borderBottom: '1px solid #f0f0f0'
-                    }}
-                  >
-                    <List.Item.Meta
-                      title={
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <Text strong>{item.title}</Text>
-                          {!item.isRead && (
-                            <div style={{ 
-                              width: '8px', 
-                              height: '8px', 
-                              borderRadius: '50%', 
-                              backgroundColor: '#1890ff' 
-                            }} />
-                          )}
-                        </div>
-                      }
-                      description={
-                        <div>
-                          <Text>{item.message}</Text>
-                          <br />
-                          <Text type="secondary" style={{ fontSize: '12px' }}>
-                            {new Date(item.timestamp).toLocaleString()}
-                          </Text>
-                        </div>
-                      }
+              <>
+                <div style={{ padding: '8px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography.Text strong>Notifications ({notifications.length})</Typography.Text>
+                  <Space>
+                    <Button 
+                      size="small" 
+                      icon={<DeleteOutlined />} 
+                      onClick={handleClearOldNotifications}
+                      title="Clear old notifications"
                     />
-                  </List.Item>
-                )}
-              />
+                    <Button 
+                      size="small" 
+                      danger 
+                      icon={<DeleteOutlined />} 
+                      onClick={handleClearAllNotifications}
+                      title="Clear all notifications"
+                    />
+                  </Space>
+                </div>
+                <List<Notification>
+                  dataSource={notifications}
+                  renderItem={(item: Notification) => (
+                    <List.Item
+                      onClick={() => handleNotificationClick(item)}
+                      style={{ 
+                        cursor: 'pointer',
+                        backgroundColor: item.isRead ? 'transparent' : '#f0f0f0',
+                        padding: '8px',
+                        borderBottom: '1px solid #f0f0f0'
+                      }}
+                    >
+                      <List.Item.Meta
+                        title={
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Text strong>{item.title}</Text>
+                            {!item.isRead && (
+                              <div style={{ 
+                                width: '8px', 
+                                height: '8px', 
+                                borderRadius: '50%', 
+                                backgroundColor: '#1890ff' 
+                              }} />
+                            )}
+                          </div>
+                        }
+                        description={
+                          <div>
+                            <Text>{item.message}</Text>
+                            <br />
+                            <Text type="secondary" style={{ fontSize: '12px' }}>
+                              {new Date(item.timestamp).toLocaleString()}
+                            </Text>
+                          </div>
+                        }
+                      />
+                    </List.Item>
+                  )}
+                />
+              </>
             ) : (
-              <Empty
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                description="No notifications"
+              <Empty 
+                description="No notifications" 
+                style={{ padding: '20px' }}
               />
             )}
           </div>

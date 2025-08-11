@@ -1,6 +1,6 @@
 import { Notification } from '../models/notification';
 import store from '../store';
-import { addNotification, updateUnreadCount } from '../slice/notification';
+import { addNotification, updateUnreadCount, clearAllNotifications } from '../slice/notification';
 import { urlSignalR } from '../utils/api-link';
 import httpClient from '../utils/http-client';
 import { toast } from 'react-toastify';
@@ -13,6 +13,8 @@ class NotificationService {
   private baseWsUrl = 'wss://datamanagerment.anhkiet.xyz/notifications/ws/';
   private accountId: number | null = null;
   private eventTarget: EventTarget;
+  private isConnecting = false;
+  private reconnectTimer: number | null = null;
 
   constructor() {
     this.eventTarget = new EventTarget();
@@ -21,15 +23,19 @@ class NotificationService {
   public setAccountId(id: number) {
     console.log('Setting account ID:', id);
     console.log('Previous account ID:', this.accountId);
-    this.accountId = id;
-    console.log('New account ID set:', this.accountId);
-    // Nếu đã có kết nối WebSocket, đóng nó và kết nối lại với account_id mới
-    if (this.ws) {
-      console.log('Disconnecting existing WebSocket connection');
-      this.disconnect();
+    
+    // Only reconnect if account ID actually changed
+    if (this.accountId !== id) {
+      this.accountId = id;
+      console.log('New account ID set:', this.accountId);
+      // Nếu đã có kết nối WebSocket, đóng nó và kết nối lại với account_id mới
+      if (this.ws) {
+        console.log('Disconnecting existing WebSocket connection');
+        this.disconnect();
+      }
+      console.log('Initiating new WebSocket connection with account ID:', this.accountId);
+      this.connect();
     }
-    console.log('Initiating new WebSocket connection with account ID:', this.accountId);
-    this.connect();
   }
 
   public addEventListener(callback: () => void) {
@@ -50,7 +56,13 @@ class NotificationService {
       return;
     }
 
+    if (this.isConnecting || this.ws?.readyState === WebSocket.CONNECTING) {
+      console.log('Already connecting or connected, skipping');
+      return;
+    }
+
     try {
+      this.isConnecting = true;
       const wsUrl = `${this.baseWsUrl}${this.accountId}`;
       console.log('Attempting to connect to WebSocket:', wsUrl);
       // Kết nối tới WebSocket server
@@ -59,6 +71,7 @@ class NotificationService {
       this.ws.onopen = () => {
         console.log('Connected to WebSocket server');
         this.reconnectAttempts = 0;
+        this.isConnecting = false;
         // Send a ping message to verify connection
         this.ws?.send(JSON.stringify({ type: 'ping' }));
       };
@@ -141,24 +154,33 @@ class NotificationService {
             // KHÔNG tự động đánh dấu đã đọc - để user tự click vào notification
           }
         } catch (error) {
-          console.error('Error processing notification:', error);
+          console.error('Error processing WebSocket message:', error);
         }
       };
 
       this.ws.onclose = (event) => {
-        if (event.code === 1006) {
-          console.log('Connection closed abnormally');
+        console.log('WebSocket connection closed:', event.code, event.reason);
+        this.isConnecting = false;
+        
+        // Only attempt reconnect if it wasn't a manual close
+        if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
+          this.reconnectAttempts++;
+          console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+          
+          this.reconnectTimer = setTimeout(() => {
+            this.connect();
+          }, this.reconnectTimeout);
         }
-        this.reconnect();
       };
 
       this.ws.onerror = (error) => {
         console.error('WebSocket error:', error);
+        this.isConnecting = false;
       };
 
     } catch (error) {
-      console.error('Failed to connect to WebSocket:', error);
-      this.reconnect();
+      console.error('Error creating WebSocket connection:', error);
+      this.isConnecting = false;
     }
   }
 
@@ -181,21 +203,41 @@ class NotificationService {
         console.error('Invalid notification ID:', notificationId);
         return;
       }
-      await httpClient.post({
-        url: `${urlSignalR}/notifications/notifications/${id}/read`,
-      });
+      
+      // Try PUT method first, fallback to POST if needed
+      try {
+        await httpClient.put({
+          url: `${urlSignalR}/notifications/notifications/${id}/read`,
+        });
+      } catch (putError) {
+        // If PUT fails, try POST as fallback
+        console.log('PUT failed, trying POST:', putError);
+        await httpClient.post({
+          url: `${urlSignalR}/notifications/notifications/${id}/read`,
+        });
+      }
+      
       // Giảm unreadCount đi 1
       store.dispatch(updateUnreadCount(-1));
     } catch (error) {
       console.error('Error marking notification as read:', error);
+      // Don't throw error to prevent UI issues
     }
   }
 
   public disconnect() {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    
     if (this.ws) {
       this.ws.close();
       this.ws = null;
     }
+    
+    this.isConnecting = false;
+    this.reconnectAttempts = 0;
   }
 
   private handleMessage(event: MessageEvent) {
@@ -225,6 +267,31 @@ class NotificationService {
 
   public resetUnreadCount() {
     store.dispatch(updateUnreadCount(0));
+  }
+
+  // Add method to prevent duplicate notifications
+  private isDuplicateNotification(notification: Notification): boolean {
+    const state = store.getState();
+    const existingNotifications = state.notificationSlice.notifications;
+    return existingNotifications.some((n: Notification) => n.id === notification.id);
+  }
+
+  // Add method to clean up old notifications
+  public cleanupOldNotifications() {
+    const state = store.getState();
+    const notifications = state.notificationSlice.notifications;
+    
+    // Remove notifications older than 24 hours
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const recentNotifications = notifications.filter((n: Notification) => 
+      new Date(n.timestamp) > oneDayAgo
+    );
+    
+    if (recentNotifications.length !== notifications.length) {
+      // Update store with only recent notifications
+      store.dispatch(clearAllNotifications());
+      recentNotifications.forEach((n: Notification) => store.dispatch(addNotification(n)));
+    }
   }
 }
 
