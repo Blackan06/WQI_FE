@@ -6,3 +6,6 @@ export const USER = "/user";
 export const STATION = "/station";
 export const MONITORING_STATION = "/monitoring-station";
 export const KAFKA = "/kafka";
+export const PRIVACY_POLICY = "/privacy-policy";
+export const TERMS_OF_SERVICE = "/terms-of-service";
+export const ABOUT = "/about";

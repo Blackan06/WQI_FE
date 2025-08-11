@@ -8,8 +8,11 @@ import UserPage from "../pages/user/UserPage";
 import StationPage from "../pages/station/StationPage";
 import MonitoringStationPage from "../pages/monitoring-station/MonitoringStationPage";
 import KafkaPage from "../pages/kafka/KafkaPage";
+import PrivacyPolicyPage from "../pages/privacy-policy/PrivacyPolicyPage";
+import TermsOfServicePage from "../pages/terms-of-service/TermsOfServicePage";
+import AboutPage from "../pages/about/AboutPage";
 import PrivateRoute from "./PrivateRoute";
-import { AUTH, DEFAUTL, HOME, LOGIN, USER, STATION, MONITORING_STATION, KAFKA } from "./routes";
+import { AUTH, DEFAUTL, HOME, LOGIN, USER, STATION, MONITORING_STATION, KAFKA, PRIVACY_POLICY, TERMS_OF_SERVICE, ABOUT } from "./routes";
 import NoLayout from "../components/layouts/NoLayout";
 import SliderFullLayout from "../components/layouts/SiderFullLayout";
 
@@ -20,6 +23,9 @@ const AppRouter: React.FC = () => {
         <Route path={LOGIN} element={<LoginPage />} />
         <Route path={DEFAUTL} element={<AuthPage />} />
         <Route path={AUTH} element={<AuthPage />} />
+        <Route path={PRIVACY_POLICY} element={<PrivacyPolicyPage />} />
+        <Route path={TERMS_OF_SERVICE} element={<TermsOfServicePage />} />
+        <Route path={ABOUT} element={<AboutPage />} />
         <Route
           path={HOME}
           element={
