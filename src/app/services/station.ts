@@ -75,19 +75,37 @@ const getInactiveMonitoringStations = async (): Promise<MonitoringStation[]> => 
 };
 
 const createMonitoringStation = async (data: CreateStationRequest): Promise<MonitoringStation> => {
-  const response = await httpClient.post({
-    url: apiLinks.station.create,
-    data: data,
-  });
-  return response.data;
+  try {
+    console.log(`[Station Service] Creating new station with data:`, data);
+    
+    const response = await httpClient.post({
+      url: apiLinks.station.create,
+      data: data,
+    });
+    
+    console.log(`[Station Service] Create successful:`, response.data);
+    return response.data;
+  } catch (error) {
+    console.error(`[Station Service] Error creating station:`, error);
+    throw error;
+  }
 };
 
 const updateMonitoringStation = async (id: number, data: UpdateStationRequest): Promise<MonitoringStation> => {
-  const response = await httpClient.put({
-    url: `${apiLinks.station.update}/${id}`,
-    data: data,
-  });
-  return response.data;
+  try {
+    console.log(`[Station Service] Updating station ${id} with data:`, data);
+    
+    const response = await httpClient.put({
+      url: `${apiLinks.station.update}/${id}`,
+      data: data,
+    });
+    
+    console.log(`[Station Service] Update successful for station ${id}:`, response.data);
+    return response.data;
+  } catch (error) {
+    console.error(`[Station Service] Error updating station ${id}:`, error);
+    throw error;
+  }
 };
 
 const deleteMonitoringStation = async (id: number): Promise<void> => {

@@ -28,6 +28,15 @@ const request = <T = any, R = AxiosResponse<T>>(
   } = arg;
 
   const tokenLocalStorage = localStorage.getItem("token");
+  const finalUrl = typeof url === "string" ? url : url(apiLinks);
+
+  console.log(`[HTTP ${method.toUpperCase()}] ${finalUrl}`);
+  if (data) {
+    console.log('Request data:', data);
+  }
+  if (params) {
+    console.log('Request params:', params);
+  }
 
   const source = axios.CancelToken.source();
   if (signal) {
@@ -42,7 +51,7 @@ const request = <T = any, R = AxiosResponse<T>>(
       "content-type": contentType,
       Authorization: `bearer ${token ?? tokenLocalStorage}`,
     },
-    url: typeof url === "string" ? url : url(apiLinks),
+    url: finalUrl,
     data,
     params,
     cancelToken: source.token,
@@ -71,10 +80,20 @@ const httpClient = {
 
 axios.interceptors.response.use(
   (response) => {
+    console.log(`[HTTP ${response.config.method?.toUpperCase()}] ${response.config.url} - Status: ${response.status}`);
     return response;
   },
   (err: AxiosError) => {
+    console.error(`[HTTP ERROR] ${err.config?.method?.toUpperCase()} ${err.config?.url} - Status: ${err.response?.status}`);
+    console.error('Error details:', {
+      status: err.response?.status,
+      statusText: err.response?.statusText,
+      data: err.response?.data,
+      message: err.message,
+    });
+
     if (err.response?.status === 401) {
+      console.log('Unauthorized - redirecting to login');
       window.location.href = "/";
     }
 
