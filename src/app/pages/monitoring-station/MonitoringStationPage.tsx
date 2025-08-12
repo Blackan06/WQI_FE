@@ -25,7 +25,6 @@ import {
 } from "@ant-design/icons";
 import useMonitoringStation from "../../hooks/use-monitoring-station";
 import { MonitoringStation, CreateStationRequest, UpdateStationRequest } from "../../models/station";
-import ApiTestComponent from "../../components/debug/ApiTestComponent";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -87,21 +86,17 @@ const MonitoringStationPage: React.FC = () => {
   };
 
   const handleEdit = (record: MonitoringStation) => {
-    console.log('Editing station:', record);
     setIsEditMode(true);
     setEditingStationId(record.station_id);
     setSelectedStation(record);
-    
-    // Set form values with proper data types
     form.setFieldsValue({
       station_name: record.station_name,
       location: record.location,
-      latitude: Number(record.latitude),
-      longitude: Number(record.longitude),
-      description: record.description || '',
+      latitude: record.latitude,
+      longitude: record.longitude,
+      description: record.description,
       is_active: record.is_active,
     });
-    
     setIsModalVisible(true);
   };
 
@@ -125,76 +120,28 @@ const MonitoringStationPage: React.FC = () => {
   const handleModalOk = async () => {
     try {
       const values = await form.validateFields();
-    
+      console.log('Form values:', values);
       console.log('Is edit mode:', isEditMode);
       console.log('Editing station ID:', editingStationId);
-      console.log('Form values:', values);
       
       if (isEditMode && editingStationId) {
         console.log('Updating station with ID:', editingStationId);
-        
-        // Ensure all required fields are present and properly typed
-        const updateData = {
-          station_name: values.station_name,
-          location: values.location,
-          latitude: Number(values.latitude),
-          longitude: Number(values.longitude),
-          description: values.description || '',
-          is_active: Boolean(values.is_active),
-        };
-        
-        console.log('Final update data:', updateData);
-        await updateStation(editingStationId, updateData);
+        await updateStation(editingStationId, values);
         message.success("Cập nhật trạm thành công!");
       } else if (!isEditMode) {
         console.log('Creating new station');
-        
-        // Ensure all required fields are present and properly typed
-        const createData = {
-          station_name: values.station_name,
-          location: values.location,
-          latitude: Number(values.latitude),
-          longitude: Number(values.longitude),
-          description: values.description || '',
-          is_active: Boolean(values.is_active),
-        };
-        
-        console.log('Final create data:', createData);
-        await createStation(createData);
+        await createStation(values as CreateStationRequest);
         message.success("Tạo trạm thành công!");
       } else {
         throw new Error('Missing station ID for update');
       }
-      
       setIsModalVisible(false);
       form.resetFields();
       setEditingStationId(null);
       setSelectedStation(null);
-      setIsEditMode(false);
-      
-      // Refresh the data
-      await fetchAllStations();
-      
     } catch (error) {
       console.error('Error in handleModalOk:', error);
-      
-      if (error instanceof Error) {
-        if (error.message.includes('Missing station ID')) {
-          message.error('Lỗi: Thiếu ID trạm để cập nhật');
-        } else if (error.message.includes('Network Error')) {
-          message.error('Lỗi kết nối mạng. Vui lòng kiểm tra lại kết nối.');
-        } else if (error.message.includes('500')) {
-          message.error('Lỗi server. Vui lòng thử lại sau.');
-        } else if (error.message.includes('400')) {
-          message.error('Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin.');
-        } else if (error.message.includes('404')) {
-          message.error('Không tìm thấy trạm. Vui lòng thử lại.');
-        } else {
-          message.error(`Thao tác thất bại: ${error.message}`);
-        }
-      } else {
-        message.error('Thao tác thất bại: Lỗi không xác định');
-      }
+      message.error(`Thao tác thất bại: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -379,10 +326,7 @@ const MonitoringStationPage: React.FC = () => {
           <Form.Item
             name="latitude"
             label="Vĩ Độ"
-            rules={[
-              { required: true, message: "Vui lòng nhập vĩ độ!" },
-              { type: 'number', min: -90, max: 90, message: "Vĩ độ phải từ -90 đến 90!" }
-            ]}
+            rules={[{ required: true, message: "Vui lòng nhập vĩ độ!" }]}
           >
             <InputNumber
               placeholder="Nhập vĩ độ"
@@ -390,17 +334,13 @@ const MonitoringStationPage: React.FC = () => {
               min={-90}
               max={90}
               step={0.000001}
-              precision={6}
             />
           </Form.Item>
 
           <Form.Item
             name="longitude"
             label="Kinh Độ"
-            rules={[
-              { required: true, message: "Vui lòng nhập kinh độ!" },
-              { type: 'number', min: -180, max: 180, message: "Kinh độ phải từ -180 đến 180!" }
-            ]}
+            rules={[{ required: true, message: "Vui lòng nhập kinh độ!" }]}
           >
             <InputNumber
               placeholder="Nhập kinh độ"
@@ -408,7 +348,6 @@ const MonitoringStationPage: React.FC = () => {
               min={-180}
               max={180}
               step={0.000001}
-              precision={6}
             />
           </Form.Item>
 
@@ -431,9 +370,6 @@ const MonitoringStationPage: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
-      
-      {/* Debug Component - Remove in production */}
-      <ApiTestComponent />
     </div>
   );
 };
