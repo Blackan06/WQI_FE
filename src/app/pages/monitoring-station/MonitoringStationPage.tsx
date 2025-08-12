@@ -150,7 +150,7 @@ const MonitoringStationPage: React.FC = () => {
       
       console.log('Processed values:', processedValues);
       
-      if (isEditMode && editingStationId) {
+      if (isEditMode && editingStationId !== null) {
         console.log('Updating station with ID:', editingStationId);
         await updateStation(editingStationId, processedValues);
         message.success("Cập nhật trạm thành công!");
