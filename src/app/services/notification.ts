@@ -14,7 +14,7 @@ class NotificationService {
   private accountId: number | null = null;
   private eventTarget: EventTarget;
   private isConnecting = false;
-  private reconnectTimer: number | null = null;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     this.eventTarget = new EventTarget();
@@ -295,4 +295,5 @@ class NotificationService {
   }
 }
 
-export default new NotificationService(); 
+const notificationService = new NotificationService();
+export default notificationService; 
