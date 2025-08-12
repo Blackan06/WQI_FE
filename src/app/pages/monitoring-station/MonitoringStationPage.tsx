@@ -60,6 +60,10 @@ const MonitoringStationPage: React.FC = () => {
     fetchAllStations();
   }, [fetchAllStations]);
 
+  useEffect(() => {
+    console.log('editingStationId changed:', editingStationId);
+  }, [editingStationId]);
+
   const handleSearch = (value: string) => {
     setSearchValue(value);
     if (value.trim()) {
@@ -80,23 +84,33 @@ const MonitoringStationPage: React.FC = () => {
   };
 
   const handleCreate = () => {
+    console.log('handleCreate called');
     setIsEditMode(false);
+    setEditingStationId(null);
+    setSelectedStation(null);
     form.resetFields();
     setIsModalVisible(true);
   };
 
   const handleEdit = (record: MonitoringStation) => {
+    console.log('handleEdit called with record:', record);
+    console.log('Station ID:', record.station_id);
+    
     setIsEditMode(true);
     setEditingStationId(record.station_id);
     setSelectedStation(record);
-    form.setFieldsValue({
+    
+    const formValues = {
       station_name: record.station_name,
       location: record.location,
       latitude: record.latitude,
       longitude: record.longitude,
       description: record.description || '',
       is_active: record.is_active,
-    });
+    };
+    
+    console.log('Setting form values:', formValues);
+    form.setFieldsValue(formValues);
     setIsModalVisible(true);
   };
 
