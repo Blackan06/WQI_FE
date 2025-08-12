@@ -37,12 +37,12 @@ export interface CreateStationRequest {
 }
 
 export interface UpdateStationRequest {
-  station_name?: string;
-  location?: string;
-  latitude?: number;
-  longitude?: number;
-  description?: string;
-  is_active?: boolean;
+  station_name: string;
+  location: string;
+  latitude: number;
+  longitude: number;
+  description: string;
+  is_active: boolean;
 }
 
 export interface WQIData {

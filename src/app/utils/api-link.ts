@@ -13,10 +13,10 @@ const apiLinks = {
     searchByDescription: `${urlServerSide}/monitoring_stations/search/description`,
     getActive: `${urlServerSide}/monitoring_stations/active`,
     getInactive: `${urlServerSide}/monitoring_stations/inactive`,
-    getById: `${urlServerSide}/monitoring_stations/`,
+    getById: `${urlServerSide}/monitoring_stations`,
     create: `${urlServerSide}/monitoring_stations/`,
-    update: `${urlServerSide}/monitoring_stations/`,
-    delete: `${urlServerSide}/monitoring_stations/`,
+    update: `${urlServerSide}/monitoring_stations`,
+    delete: `${urlServerSide}/monitoring_stations`,
   },
   kafka: {
     produceBatch: `${urlServerSide}/produce-batch`,

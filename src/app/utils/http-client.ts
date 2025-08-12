@@ -36,11 +36,17 @@ const request = <T = any, R = AxiosResponse<T>>(
     });
   }
 
+  const authToken = token ?? tokenLocalStorage;
+  console.log('Making request to:', typeof url === "string" ? url : url(apiLinks));
+  console.log('Method:', method);
+  console.log('Data:', data);
+  console.log('Auth token:', authToken ? 'Present' : 'Missing');
+  
   return axios.request<T, R>({
     method,
     headers: {
       "content-type": contentType,
-      Authorization: `bearer ${token ?? tokenLocalStorage}`,
+      Authorization: authToken ? `bearer ${authToken}` : undefined,
     },
     url: typeof url === "string" ? url : url(apiLinks),
     data,

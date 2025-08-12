@@ -94,7 +94,7 @@ const MonitoringStationPage: React.FC = () => {
       location: record.location,
       latitude: record.latitude,
       longitude: record.longitude,
-      description: record.description,
+      description: record.description || '',
       is_active: record.is_active,
     });
     setIsModalVisible(true);
@@ -124,13 +124,25 @@ const MonitoringStationPage: React.FC = () => {
       console.log('Is edit mode:', isEditMode);
       console.log('Editing station ID:', editingStationId);
       
+      // Ensure data types are correct and include all required fields
+      const processedValues = {
+        station_name: values.station_name,
+        location: values.location,
+        latitude: Number(values.latitude),
+        longitude: Number(values.longitude),
+        description: values.description || '',
+        is_active: Boolean(values.is_active)
+      };
+      
+      console.log('Processed values:', processedValues);
+      
       if (isEditMode && editingStationId) {
         console.log('Updating station with ID:', editingStationId);
-        await updateStation(editingStationId, values);
+        await updateStation(editingStationId, processedValues);
         message.success("Cập nhật trạm thành công!");
       } else if (!isEditMode) {
         console.log('Creating new station');
-        await createStation(values as CreateStationRequest);
+        await createStation(processedValues as CreateStationRequest);
         message.success("Tạo trạm thành công!");
       } else {
         throw new Error('Missing station ID for update');
@@ -354,6 +366,7 @@ const MonitoringStationPage: React.FC = () => {
           <Form.Item
             name="description"
             label="Mô Tả"
+            rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
           >
             <TextArea
               placeholder="Nhập mô tả"
@@ -365,6 +378,7 @@ const MonitoringStationPage: React.FC = () => {
             name="is_active"
             label="Trạng Thái"
             valuePropName="checked"
+            initialValue={true}
           >
             <Switch checkedChildren="Hoạt động" unCheckedChildren="Không hoạt động" />
           </Form.Item>

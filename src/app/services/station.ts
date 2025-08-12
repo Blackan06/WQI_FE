@@ -75,18 +75,27 @@ const getInactiveMonitoringStations = async (): Promise<MonitoringStation[]> => 
 };
 
 const createMonitoringStation = async (data: CreateStationRequest): Promise<MonitoringStation> => {
+  console.log('Creating station with data:', data);
+  console.log('Create URL:', apiLinks.station.create);
+  
   const response = await httpClient.post({
     url: apiLinks.station.create,
     data: data,
   });
+  console.log('Create response:', response);
   return response.data;
 };
 
 const updateMonitoringStation = async (id: number, data: UpdateStationRequest): Promise<MonitoringStation> => {
+  console.log('Updating station with ID:', id);
+  console.log('Update data:', data);
+  console.log('Update URL:', `${apiLinks.station.update}/${id}`);
+  
   const response = await httpClient.put({
     url: `${apiLinks.station.update}/${id}`,
     data: data,
   });
+  console.log('Update response:', response);
   return response.data;
 };
 
