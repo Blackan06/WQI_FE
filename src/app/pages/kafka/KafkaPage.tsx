@@ -81,7 +81,7 @@ const KafkaPage: React.FC = () => {
         <InputNumber
           value={value}
           onChange={(val) => handleUpdateMessage(index, "station_id", val)}
-          min={1}
+          min={0}
           style={{ width: "100%" }}
         />
       ),
