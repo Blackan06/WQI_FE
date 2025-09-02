@@ -52,5 +52,5 @@ jobs:
             docker rm dm_fe || true
 
             echo "Starting new container..."
-            docker run -d --name dm_fe -p 3000:80 --restart=always ${{ secrets.DOCKER_USER }}/dm_fe:latest
+            docker run -d --name dm_fe -p 3002:80 --restart=always ${{ secrets.DOCKER_USER }}/dm_fe:latest
 
